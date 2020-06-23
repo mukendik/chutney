@@ -1,6 +1,7 @@
 package com.chutneytesting.junit.engine;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.toList;
 
 import com.chutneytesting.engine.api.glacio.GlacioAdapter;
 import com.chutneytesting.engine.domain.execution.StepDefinition;
@@ -17,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import org.junit.platform.engine.EngineDiscoveryRequest;
 import org.junit.platform.engine.Filter;
 import org.junit.platform.engine.TestDescriptor;
@@ -30,6 +30,7 @@ import org.junit.platform.engine.discovery.DirectorySelector;
 import org.junit.platform.engine.discovery.FileSelector;
 import org.junit.platform.engine.discovery.PackageNameFilter;
 import org.junit.platform.engine.discovery.PackageSelector;
+import org.junit.platform.engine.discovery.UniqueIdSelector;
 import org.junit.platform.engine.discovery.UriSelector;
 import org.junit.platform.engine.support.descriptor.ClassSource;
 import org.junit.platform.engine.support.descriptor.MethodSource;
@@ -44,8 +45,8 @@ public class DiscoverySelectorResolver {
 
     private static final String FEATURE_EXTENSION = ".feature";
 
-    private PathMatchingResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
-    private GlacioAdapter glacioAdapter;
+    private final PathMatchingResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
+    private final GlacioAdapter glacioAdapter;
     private boolean classMode;
 
     public DiscoverySelectorResolver(GlacioAdapter glacioAdapter) {
@@ -55,6 +56,7 @@ public class DiscoverySelectorResolver {
     public void resolveSelectors(EngineDiscoveryRequest engineDiscoveryRequest, ChutneyEngineDescriptor engineDescriptor) {
         Predicate<String> packageNameFilter = Filter.composeFilters(engineDiscoveryRequest.getFiltersByType(PackageNameFilter.class)).toPredicate();
 
+        // Keep class selector first in line in order to position classMode property
         List<ClassSelector> classSelectors = engineDiscoveryRequest.getSelectorsByType(ClassSelector.class);
         classSelectors.forEach(cs -> resolveClass(engineDescriptor, cs.getJavaClass()));
 
@@ -79,6 +81,31 @@ public class DiscoverySelectorResolver {
 
         List<UriSelector> uriSelectors = engineDiscoveryRequest.getSelectorsByType(UriSelector.class);
         uriSelectors.forEach(us -> resolveURI(engineDescriptor, us.getUri()));
+
+        // Use UniqueId selectors as filter over current engine descriptor. As such, keep this last in line.
+        List<UniqueIdSelector> uniqueIdSelectors = engineDiscoveryRequest.getSelectorsByType(UniqueIdSelector.class);
+        resolveUniqueIds(engineDescriptor, uniqueIdSelectors.stream().map(UniqueIdSelector::getUniqueId).collect(toList()));
+    }
+
+    private void resolveUniqueIds(ChutneyEngineDescriptor engineDescriptor, List<UniqueId> uniqueIds) {
+        if (uniqueIds.isEmpty()) {
+            return;
+        }
+
+        if (engineDescriptor.getChildren().isEmpty()) {
+            resolvePackage(engineDescriptor, "");
+        }
+
+        List<String> uniqueIdsStrings = uniqueIds.stream().map(UniqueId::toString).collect(toList());
+        List<? extends TestDescriptor> testDescriptors = engineDescriptor.getChildren().stream()
+            .flatMap(td -> td.getChildren().stream())
+            .filter(ts -> uniqueIdsStrings.stream().noneMatch(uis -> ts.getUniqueId().toString().contains(uis)))
+            .collect(toList());
+
+        testDescriptors.forEach(TestDescriptor::removeFromHierarchy);
+
+        List<? extends TestDescriptor> emptyFeatures = engineDescriptor.getChildren().stream().filter(ts -> ts.getChildren().isEmpty()).collect(toList());
+        emptyFeatures.forEach(TestDescriptor::removeFromHierarchy);
     }
 
     private void resolveURI(TestDescriptor parent, URI uri) {
@@ -130,7 +157,7 @@ public class DiscoverySelectorResolver {
                 List<Path> features = Files.walk(dir.toPath())
                     .filter(path -> path.toFile().isFile())
                     .filter(path -> hasFeatureExtension(path.toFile().getName()))
-                    .collect(Collectors.toList());
+                    .collect(toList());
 
                 features.forEach(path -> resolveFile(parent, path.toFile()));
             } catch (IOException ioe) {

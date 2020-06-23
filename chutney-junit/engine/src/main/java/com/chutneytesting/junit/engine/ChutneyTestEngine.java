@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class ChutneyTestEngine extends HierarchicalTestEngine<ChutneyEngineExecutionContext> {
 
+    public static final String CHUTNEY_JUNIT_ENGINE_ID = "chutney-junit-engine";
     private static final Logger LOGGER = LoggerFactory.getLogger(ChutneyTestEngine.class);
 
     private final GlacioAdapterConfiguration glacioAdapterConfiguration;
@@ -34,7 +35,7 @@ public class ChutneyTestEngine extends HierarchicalTestEngine<ChutneyEngineExecu
 
     @Override
     public String getId() {
-        return "chutney-junit-engine";
+        return CHUTNEY_JUNIT_ENGINE_ID;
     }
 
     @Override
