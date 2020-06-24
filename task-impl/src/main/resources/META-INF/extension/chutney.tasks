@@ -38,6 +38,8 @@ com.chutneytesting.task.ssh.SshClientTask
 com.chutneytesting.task.jms.JmsCleanQueueTask
 com.chutneytesting.task.jms.JmsListenerTask
 com.chutneytesting.task.jms.JmsSenderTask
+com.chutneytesting.task.jms.JmsBrokerStartTask
+com.chutneytesting.task.jms.JmsBrokerStopTask
 
 com.chutneytesting.task.sql.SqlTask
 
