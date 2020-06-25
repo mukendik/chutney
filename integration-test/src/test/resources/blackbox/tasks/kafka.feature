@@ -1,9 +1,9 @@
 # language: en
-@HttpTask
-Feature: HTTP Task test
+@Kafka
+Feature: Kafka all Tasks test
 
-    Scenario Outline: Http <verb> request wrong url
-        Given A target pointing to an unknown http server
+    Scenario: Kafka basic publish wrong url failure
+        Given A target pointing to a non unknown service
             Do http-post Create environment and target
                 On CHUTNEY_LOCAL
                 With uri /api/v2/environment
@@ -12,12 +12,12 @@ Feature: HTTP Task test
                 With body
                 """
                 {
-                    "name": "HTTP_ENV_<verb>_KO",
+                    "name": "KAFKA_ENV_KO",
                     "description": "",
                     "targets": [
                         {
-                            "name": "test_http",
-                            "url": "http://localhost:12345"
+                            "name": "test_kafka",
+                            "url": "tcp://unknownhost:12345"
                         }
                     ]
                 }
@@ -35,22 +35,15 @@ Feature: HTTP Task test
                 With body
                 """
                 {
-                    "title":"http client failure <verb>",
+                    "title":"kafka client sender",
                     "scenario":{
                         "when":{
-                            "sentence":"Make failed <verb> request",
+                            "sentence":"Publish to broker",
                             "implementation":{
-                                "task":"{\n type: http-${'<verb>'.toLowerCase()} \n target: test_http \n inputs: {\n <task_inputs> \n timeout: 500 ms \n} \n}"
+                                "task":"{\n type: kafka-basic-publish \n target: test_kafka \n inputs: {\n topic: a-topic \n payload: bodybuilder \n} \n}"
                             }
                         },
-                        "thens":[
-                            {
-                                "sentence":"Assert http status",
-                                "implementation":{
-                                    "task":"{\n type: compare \n inputs: {\n actual: \${T(Integer).toString(#status)} \n expected: 200 \n mode: not equals \n} \n}"
-                                }
-                            }
-                        ]
+                        "thens":[]
                     }
                 }
                 """
@@ -62,7 +55,8 @@ Feature: HTTP Task test
         When last saved scenario is executed
             Do http-post Post scenario execution to Chutney instance
                 On CHUTNEY_LOCAL
-                With uri /api/ui/scenario/execution/v1/${#scenarioId}/HTTP_ENV_<verb>_KO
+                With uri /api/ui/scenario/execution/v1/${#scenarioId}/KAFKA_ENV_KO
+                With timeout 5 s
                 Take report ${#body}
             Do compare Assert HTTP status is 200
                 With actual ${T(Integer).toString(#status)}
@@ -74,21 +68,12 @@ Feature: HTTP Task test
                 With expected FAILURE
                 With mode equals
 
-        Examples:
-            | verb    | task_inputs                       |
-            | GET     | uri: /notused                     |
-            | DELETE  | uri: /notused                     |
-            | POST    | uri: /notused \n body: cool buddy |
-            | PUT     | uri: /notused \n body: cool buddy |
-
-    Scenario Outline: Http <verb> request local valid endpoint
-        Given an app providing an http interface
-            Do https-server-start
-                With port ${#tcpPortRandomRange(100).toString()}
-                With truststore-path ${#resourcePath("blackbox/security/truststore.jks")}
-                With truststore-password truststore
-                Take appServer ${#httpsServer}
-        And a configured target for an endpoint
+    Scenario: Kafka basic publish success
+        Given an embedded kafka server with a topic a-topic
+            Do kafka-broker-start
+                With topics
+                | a-topic |
+        And an associated target test_kafka having url in system property spring.embedded.kafka.brokers
             Do http-post Create environment and target
                 On CHUTNEY_LOCAL
                 With uri /api/v2/environment
@@ -97,14 +82,12 @@ Feature: HTTP Task test
                 With body
                 """
                 {
-                    "name": "HTTP_ENV_<verb>",
+                    "name": "KAFKA_ENV_OK",
                     "description": "",
                     "targets": [
                         {
-                            "name": "test_http",
-                            "url": "${#appServer.baseUrl()}",
-                            "keyStore": "${#escapeJson(#resourcePath("blackbox/security/client.jks"))}",
-                            "keyStorePassword": "client"
+                            "name": "test_kafka",
+                            "url": "tcp://${#kafkaBroker.getBrokerAddresses()[0]}"
                         }
                     ]
                 }
@@ -122,19 +105,25 @@ Feature: HTTP Task test
                 With body
                 """
                 {
-                    "title":"http client <verb>",
+                    "title":"kafka client sender",
                     "scenario":{
                         "when":{
-                            "sentence":"Make <verb> request",
+                            "sentence":"Publish to broker",
                             "implementation":{
-                                "task":"{\n type: http-${'<verb>'.toLowerCase()} \n target: test_http \n inputs: {\n <task_inputs> \n timeout: 500 ms \n} \n}"
+                                "task":"{\n type: kafka-basic-publish \n target: test_kafka \n inputs: {\n topic: a-topic \n payload: bodybuilder \n headers: {\n X-API-VERSION: \"1.0\" \n} \n} \n}"
                             }
                         },
                         "thens":[
                             {
-                                "sentence":"Assert http status",
+                                "sentence":"Consume from broker",
                                 "implementation":{
-                                    "task":"{\n type: compare \n inputs: {\n actual: \${T(Integer).toString(#status)} \n expected: \"200\" \n mode: equals \n} \n}"
+                                    "task":"{\n type: kafka-basic-consume \n target: test_kafka \n inputs: {\n topic: a-topic \n group: chutney \n properties: {\n auto.offset.reset: earliest \n} \n} \n outputs: {\n payload : \${#payloads[0]} \n} \n}"
+                                }
+                            },
+                            {
+                                "sentence":"Check payload",
+                                "implementation":{
+                                    "task":"{\n type: string-assert \n inputs: {\n document: \${#payload} \n expected: bodybuilder \n} \n}"
                                 }
                             }
                         ]
@@ -149,7 +138,7 @@ Feature: HTTP Task test
         When last saved scenario is executed
             Do http-post Post scenario execution to Chutney instance
                 On CHUTNEY_LOCAL
-                With uri /api/ui/scenario/execution/v1/${#scenarioId}/HTTP_ENV_<verb>
+                With uri /api/ui/scenario/execution/v1/${#scenarioId}/KAFKA_ENV_OK
                 Take report ${#body}
             Do compare Assert HTTP status is 200
                 With actual ${T(Integer).toString(#status)}
@@ -160,10 +149,3 @@ Feature: HTTP Task test
                 With actual ${#json(#report, "$.report.status")}
                 With expected SUCCESS
                 With mode equals
-
-        Examples:
-            | verb    | task_inputs                         |
-            | GET     | uri: /mock/get                      |
-            | DELETE  | uri: /mock/delete                   |
-            | POST    | uri: /mock/post \n body: cool buddy |
-            | PUT     | uri: /mock/put \n body: cool buddy  |
