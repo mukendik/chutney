@@ -70,3 +70,5 @@ com.chutneytesting.task.assertion.CompareTask
 
 com.chutneytesting.task.kafka.KafkaBasicPublishTask
 com.chutneytesting.task.kafka.KafkaBasicConsumeTask
+com.chutneytesting.task.kafka.KafkaBrokerStartTask
+com.chutneytesting.task.kafka.KafkaBrokerStopTask
