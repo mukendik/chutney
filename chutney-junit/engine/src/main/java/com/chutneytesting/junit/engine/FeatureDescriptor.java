@@ -7,8 +7,12 @@ import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.hierarchical.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FeatureDescriptor extends AbstractTestDescriptor implements Node<ChutneyEngineExecutionContext> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeatureDescriptor.class);
 
     private Status status = Status.NOT_EXECUTED;
     private List<Status> scenarioReportStatus = new ArrayList<>();
@@ -29,11 +33,11 @@ public class FeatureDescriptor extends AbstractTestDescriptor implements Node<Ch
     }
 
     @Override
-    public void after(ChutneyEngineExecutionContext context) throws Exception {
+    public void after(ChutneyEngineExecutionContext context) {
         status = Status.worst(scenarioReportStatus);
-//        if (Status.FAILURE.equals(status)) {
-//            throw new Exception("Feature " + getDisplayName() + " FAILURE");
-//        }
+
+        LOGGER.info("Feature {} execution", this.getDisplayName());
+        LOGGER.info("status : {}", status);
     }
 
     protected void addScenarioStatus(Status scenarioReportStatus) {

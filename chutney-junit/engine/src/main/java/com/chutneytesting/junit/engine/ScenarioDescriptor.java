@@ -3,12 +3,18 @@ package com.chutneytesting.junit.engine;
 import com.chutneytesting.engine.domain.execution.StepDefinition;
 import com.chutneytesting.engine.domain.execution.report.Status;
 import com.chutneytesting.engine.domain.execution.report.StepExecutionReport;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
 import org.junit.platform.engine.support.hierarchical.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ScenarioDescriptor extends AbstractTestDescriptor implements Node<ChutneyEngineExecutionContext> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScenarioDescriptor.class);
+    private static final ObjectMapper om = new ObjectMapper();
 
     private StepDefinition stepDefinition;
     private StepExecutionReport report;
@@ -33,6 +39,10 @@ public class ScenarioDescriptor extends AbstractTestDescriptor implements Node<C
     public void after(ChutneyEngineExecutionContext context) throws Exception {
         FeatureDescriptor featureDescriptor = (FeatureDescriptor) this.getParent().get();
         featureDescriptor.addScenarioStatus(report.status);
+
+        LOGGER.info("Scenario {} execution", this.getDisplayName());
+        LOGGER.info("status : {}", report.status);
+        LOGGER.info(om.writerWithDefaultPrettyPrinter().writeValueAsString(report));
 
         if (Status.FAILURE.equals(report.status)) {
             StepExecutionReport failedStepReport = findFailedStep(report);
