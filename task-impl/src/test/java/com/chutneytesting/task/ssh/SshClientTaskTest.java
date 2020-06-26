@@ -32,6 +32,11 @@ public class SshClientTaskTest {
         fakeSshServer.start();
     }
 
+    @AfterAll
+    public static void stop_ssh_server() throws Exception {
+        fakeSshServer.stop();
+    }
+
     @Test
     public void should_succeed_to_execute_a_command_with_password() {
         // Given
@@ -47,7 +52,7 @@ public class SshClientTaskTest {
         TaskExecutionResult actualResult = task.execute();
 
         // Then
-        assertThat(actualResult.outputs.get("results")).isEqualToComparingFieldByFieldRecursively(expectedResults);
+        assertThat(actualResult.outputs.get("results")).usingRecursiveComparison().isEqualTo(expectedResults);
     }
 
     @Test
@@ -66,7 +71,7 @@ public class SshClientTaskTest {
         TaskExecutionResult actualResult = task.execute();
 
         // Then
-        assertThat(actualResult.outputs.get("results")).isEqualToComparingFieldByFieldRecursively(expectedResults);
+        assertThat(actualResult.outputs.get("results")).usingRecursiveComparison().isEqualTo(expectedResults);
     }
 
     @Test
@@ -102,10 +107,5 @@ public class SshClientTaskTest {
 
         // Then
         assertThat(actualResult.status).isEqualTo(Failure);
-    }
-
-    @AfterAll
-    public static void stop_ssh_server() throws Exception {
-        fakeSshServer.stop();
     }
 }
