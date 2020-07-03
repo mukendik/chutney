@@ -1,6 +1,5 @@
 package com.chutneytesting.junit.engine;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 
 import com.chutneytesting.engine.api.glacio.GlacioAdapter;
@@ -14,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -225,7 +225,7 @@ public class DiscoverySelectorResolver {
             while ((length = in.read(buffer)) != -1) {
                 result.write(buffer, 0, length);
             }
-            return result.toString(UTF_8.name());
+            return result.toString(StandardCharsets.UTF_8.name());
         } catch (IOException ioe) {
             throw new UncheckedIOException("Unable to read inputstream", ioe);
         }
