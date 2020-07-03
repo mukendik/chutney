@@ -1,4 +1,4 @@
-package com.chutneytesting.task.ssh;
+package com.chutneytesting.task.ssh.sshj;
 
 
 import com.chutneytesting.task.spi.injectable.Target;
@@ -22,7 +22,7 @@ public class Connection {
         this.privateKey = privateKey;
     }
 
-    static Connection from(Target target) {
+    public static Connection from(Target target) {
         guardClause(target);
 
         final String host = extractHost(target);

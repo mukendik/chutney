@@ -1,4 +1,4 @@
-package com.chutneytesting.task.ssh;
+package com.chutneytesting.task.ssh.sshj;
 
 import com.google.common.base.MoreObjects;
 import java.util.Objects;

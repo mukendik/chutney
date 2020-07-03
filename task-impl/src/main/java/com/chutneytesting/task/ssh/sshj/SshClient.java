@@ -1,4 +1,4 @@
-package com.chutneytesting.task.ssh;
+package com.chutneytesting.task.ssh.sshj;
 
 import java.io.IOException;
 

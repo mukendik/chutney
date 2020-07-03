@@ -10,6 +10,8 @@ import static org.mockito.Mockito.mock;
 import com.chutneytesting.task.spi.TaskExecutionResult;
 import com.chutneytesting.task.spi.injectable.Logger;
 import com.chutneytesting.task.spi.injectable.Target;
+import com.chutneytesting.task.ssh.sshj.Command;
+import com.chutneytesting.task.ssh.sshj.CommandResult;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,12 +45,12 @@ public class SshClientTaskTest {
         Logger logger = mock(Logger.class);
         Target targetMock = buildInfoWithPasswordFor(fakeSshServer);
         List<CommandResult> expectedResults = new ArrayList<>();
-        expectedResults.add(new CommandResult(new Command("echo Hello"), 0, "Hello\n", ""));
+        expectedResults.add(new CommandResult(new Command("echo Hello" + System.lineSeparator() + "exit" + System.lineSeparator()), 0, "Hello\n", ""));
 
         List<Object> commands = Collections.singletonList("echo Hello");
 
         // When
-        SshClientTask task = new SshClientTask(targetMock, logger, commands);
+        SshClientTask task = new SshClientTask(targetMock, logger, commands, null);
         TaskExecutionResult actualResult = task.execute();
 
         // Then
@@ -67,7 +69,7 @@ public class SshClientTaskTest {
         String command = "echo Hello";
 
         // When
-        SshClientTask task = new SshClientTask(target, logger, Collections.singletonList(command));
+        SshClientTask task = new SshClientTask(target, logger, Collections.singletonList(command), null);
         TaskExecutionResult actualResult = task.execute();
 
         // Then
@@ -85,7 +87,7 @@ public class SshClientTaskTest {
         command.put("timeout", "1 ms");
 
         // When
-        SshClientTask sshClient = new SshClientTask(target, logger, Collections.singletonList(command));
+        SshClientTask sshClient = new SshClientTask(target, logger, Collections.singletonList(command), null);
         TaskExecutionResult actualResult = sshClient.execute();
 
         // Then
@@ -102,7 +104,7 @@ public class SshClientTaskTest {
         String command = "echo Hello";
 
         // when
-        SshClientTask sshClient = new SshClientTask(target, logger, Collections.singletonList(command));
+        SshClientTask sshClient = new SshClientTask(target, logger, Collections.singletonList(command), null);
         TaskExecutionResult actualResult = sshClient.execute();
 
         // Then

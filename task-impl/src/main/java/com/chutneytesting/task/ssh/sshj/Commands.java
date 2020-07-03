@@ -1,4 +1,4 @@
-package com.chutneytesting.task.ssh;
+package com.chutneytesting.task.ssh.sshj;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class Commands {
         this.all = commands;
     }
 
-    static Commands from(List<Object> commands) {
+    public static Commands from(List<Object> commands) {
         List<Command> cmds = commands.stream()
             .map(Commands::buildCommand)
             .collect(Collectors.toList());
@@ -44,7 +44,7 @@ public class Commands {
         throw new IllegalStateException("Unable to understand command: " + command.toString());
     }
 
-    List<CommandResult> executeWith(SshClient sshClient) throws IOException {
+    public List<CommandResult> executeWith(SshClient sshClient) throws IOException {
         List<CommandResult> results = new ArrayList<>();
 
         for (Command command : this.all) {

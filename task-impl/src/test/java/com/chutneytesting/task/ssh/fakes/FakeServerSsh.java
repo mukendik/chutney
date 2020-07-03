@@ -10,8 +10,8 @@ import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.pubkey.AcceptAllPublickeyAuthenticator;
 import org.apache.sshd.server.keyprovider.AbstractGeneratorHostKeyProvider;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
+import org.apache.sshd.server.shell.InteractiveProcessShellFactory;
 import org.apache.sshd.server.shell.ProcessShellCommandFactory;
-import org.apache.sshd.server.shell.ProcessShellFactory;
 
 public class FakeServerSsh {
 
@@ -28,7 +28,7 @@ public class FakeServerSsh {
         sshd.setKeyPairProvider(hostKeyProvider);
         sshd.setPasswordAuthenticator((username, password, session) -> USERNAME.equals(username) && PASSWORD.equals(password));
         sshd.setPublickeyAuthenticator(AcceptAllPublickeyAuthenticator.INSTANCE);
-        sshd.setShellFactory(new ProcessShellFactory("/bin/sh", "-i", "-l"));
+        sshd.setShellFactory(InteractiveProcessShellFactory.INSTANCE);
         sshd.setCommandFactory(ProcessShellCommandFactory.INSTANCE);
         return sshd;
     }

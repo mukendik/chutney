@@ -1,4 +1,4 @@
-package com.chutneytesting.task.ssh;
+package com.chutneytesting.task.ssh.sshj;
 
 
 import com.google.common.base.MoreObjects;
@@ -13,7 +13,7 @@ public class Command {
     public final String command;
     public final Duration timeout;
 
-    Command(String command) {
+    public Command(String command) {
         this.command = command;
         this.timeout = DEFAULT_DURATION;
     }
