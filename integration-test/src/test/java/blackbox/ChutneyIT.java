@@ -7,9 +7,10 @@ import com.chutneytesting.junit.api.BeforeAll;
 import com.chutneytesting.junit.api.Chutney;
 import com.chutneytesting.junit.engine.EnvironmentService;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Random;
 import org.apache.groovy.util.Maps;
-import org.junit.rules.TemporaryFolder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.SocketUtils;
@@ -21,7 +22,7 @@ public class ChutneyIT {
     private int port;
     private int securePort;
     private int dbPort;
-    private TemporaryFolder tmpFolder;
+    private Path tmpFolder;
 
     private EnvironmentService environmentService;
 
@@ -32,15 +33,15 @@ public class ChutneyIT {
         securePort = findAvailableTcpPort();
         dbPort = findAvailableTcpPort();
 
-        tmpFolder = new TemporaryFolder();
-        tmpFolder.create();
+        tmpFolder = Files.createTempDirectory("chutney");
+        tmpFolder.toFile().createNewFile();
 
         setEnvironment(securePort);
     }
 
     @BeforeAll
     public void setUp() throws IOException {
-        String tmpConfDir = tmpFolder.newFolder("conf").getAbsolutePath();
+        String tmpConfDir = tmpFolder.resolve("conf").toString();
 
         System.setProperty("port", String.valueOf(port));
         System.setProperty("securePort", String.valueOf(securePort));
@@ -53,7 +54,7 @@ public class ChutneyIT {
 
     @AfterAll
     public void tearDown() {
-        tmpFolder.delete();
+        tmpFolder.toFile().delete();
         localChutney.stop();
         cleanEnvironment();
     }
@@ -97,7 +98,7 @@ public class ChutneyIT {
                 .withProperties(
                     Maps.of(
                         "driverClassName", "org.postgresql.Driver",
-                        "jdbcUrl", "jdbc:postgresql://localhost:"+dbPort+"/postgres",
+                        "jdbcUrl", "jdbc:postgresql://localhost:" + dbPort + "/postgres",
                         "dataSource.user", "postgres",
                         "dataSource.password", "postgres",
                         "maximumPoolSize", "2"

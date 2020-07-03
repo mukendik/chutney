@@ -60,7 +60,7 @@ Feature: Engine tasks exposition
             | selenium-switch-to                | web-driver,org.openqa.selenium.WebDriver selector,java.lang.String by,java.lang.String wait,java.lang.Integer switchType,java.lang.String                                                                                  |
             | selenium-wait                     | web-driver,org.openqa.selenium.WebDriver selector,java.lang.String by,java.lang.String value,java.lang.String wait,java.lang.Integer                                                                                       |
             | sql                               | statements,java.util.List                                                                                                                                                                                                  |
-            | ssh-client                        | commands,java.util.List                                                                                                                                                                                                    |
+            | ssh-client                        | commands,java.util.List channel,java.lang.String                                                                                                                                                                           |
 
     Scenario Outline: A loaded task properties can be asked for by identifier
         When request engine for task <task-id>
@@ -123,4 +123,4 @@ Feature: Engine tasks exposition
             | selenium-switch-to                | web-driver,org.openqa.selenium.WebDriver selector,java.lang.String by,java.lang.String wait,java.lang.Integer switchType,java.lang.String                                                                                  |
             | selenium-wait                     | web-driver,org.openqa.selenium.WebDriver selector,java.lang.String by,java.lang.String value,java.lang.String wait,java.lang.Integer                                                                                       |
             | sql                               | statements,java.util.List                                                                                                                                                                                                  |
-            | ssh-client                        | commands,java.util.List                                                                                                                                                                                                    |
+            | ssh-client                        | commands,java.util.List channel,java.lang.String                                                                                                                                                                           |
