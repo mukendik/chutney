@@ -1,10 +1,15 @@
 package com.chutneytesting.task.function;
 
+import static java.util.Optional.ofNullable;
+
 import com.chutneytesting.task.spi.SpelFunction;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -15,11 +20,7 @@ public class ClasspathFunctions {
 
     @SpelFunction
     public static String resourcePath(String name) throws URISyntaxException {
-        URI uri = Objects.requireNonNull(
-            Thread.currentThread().getContextClassLoader().getResource(name)
-        ).toURI();
-
-        return uriToPath(uri);
+        return resourceToPath(name).toString();
     }
 
     @SpelFunction
@@ -28,13 +29,29 @@ public class ClasspathFunctions {
         List<String> paths = new ArrayList<>();
         while (urls.hasMoreElements()) {
             paths.add(
-                uriToPath(urls.nextElement().toURI())
+                uriToPath(urls.nextElement().toURI()).toString()
             );
         }
         return paths;
     }
 
-    private static String uriToPath(URI uri) {
-        return Paths.get(uri).toString();
+    @SpelFunction
+    public static String resourceContent(String name, String charset) throws URISyntaxException, IOException {
+        return new String(
+            Files.readAllBytes(resourceToPath(name)),
+            ofNullable(charset).map(Charset::forName).orElse(Charset.defaultCharset())
+        );
+    }
+
+    private static Path resourceToPath(String name) throws URISyntaxException {
+        URI uri = Objects.requireNonNull(
+            Thread.currentThread().getContextClassLoader().getResource(name)
+        ).toURI();
+
+        return uriToPath(uri);
+    }
+
+    private static Path uriToPath(URI uri) {
+        return Paths.get(uri);
     }
 }
