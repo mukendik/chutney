@@ -49,4 +49,9 @@ public class EscapeFunctions {
     public static String unescapeHtml4(String text) {
         return StringEscapeUtils.unescapeHtml4(text);
     }
+
+    @SpelFunction
+    public static String escapeSql(String sql) {
+        return sql.replaceAll("'", "''");
+    }
 }
