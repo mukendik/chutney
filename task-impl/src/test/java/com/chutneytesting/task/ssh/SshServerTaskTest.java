@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,10 +28,11 @@ class SshServerTaskTest {
     private SshServerMock sshServer;
 
     @AfterEach
-    public void tearDown() {
+    public void tearDown() throws InterruptedException {
         if (sshServer != null) {
             SshServerStopTask sshServerStopTask = new SshServerStopTask(new TestLogger(), sshServer);
             sshServerStopTask.execute();
+            TimeUnit.MILLISECONDS.sleep(500);
             assertThat(sshServer.isClosed()).isTrue();
         }
     }
