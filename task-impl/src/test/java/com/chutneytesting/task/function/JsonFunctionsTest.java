@@ -7,7 +7,7 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("unchecked")
-public class JsonPathFunctionTest {
+public class JsonFunctionsTest {
 
     @Test
     public void result_is_escaped_for_further_serialization() throws JSONException {
@@ -17,7 +17,7 @@ public class JsonPathFunctionTest {
                 "\"key2\": \"gh\"" +
                 "}, {}]";
 
-        Object result = JsonPathFunction.json(json, "$[0]");
+        Object result = JsonFunctions.json(json, "$[0]");
 
         Assertions.assertThat(result).isInstanceOfSatisfying(Map.class, map -> Assertions.assertThat(map).containsEntry("key1", 42));
     }
@@ -30,7 +30,7 @@ public class JsonPathFunctionTest {
                 "\"key2\": \"gh\"" +
                 "}";
 
-        Object result = JsonPathFunction.json(json, "$.key1");
+        Object result = JsonFunctions.json(json, "$.key1");
 
         Assertions.assertThat(result).isInstanceOfSatisfying(List.class, list -> Assertions.assertThat(list).contains("value1"));
     }
