@@ -41,13 +41,17 @@ public class ChutneyIT {
 
     @BeforeAll
     public void setUp() throws IOException {
-        String tmpConfDir = tmpFolder.resolve("conf").toString();
+        Path tmpConfDir = tmpFolder.resolve("conf");
 
         System.setProperty("port", String.valueOf(port));
         System.setProperty("securePort", String.valueOf(securePort));
         System.setProperty("chutney.db-server.port", String.valueOf(dbPort));
-        System.setProperty("configuration-folder", tmpConfDir);
-        System.setProperty("persistence-repository-folder", tmpConfDir);
+
+        System.setProperty("configuration-folder", tmpConfDir.toString());
+        System.setProperty("git-configuration-folder", tmpConfDir.resolve("git-conf").toString());
+        System.setProperty("chutney.backups.root", tmpConfDir.resolve("backups").toString());
+        System.setProperty("persistence-repository-folder", tmpConfDir.toString());
+        System.setProperty("persistence.agentNetwork.file", tmpConfDir.resolve("endpoints.json").toString());
 
         localChutney = SpringApplication.run(IntegrationTestConfiguration.class);
     }
