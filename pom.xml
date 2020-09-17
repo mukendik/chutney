@@ -5,7 +5,7 @@
 
     <groupId>com.chutneytesting</groupId>
     <artifactId>chutney-parent</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.2.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Chutney</name>
@@ -107,7 +107,7 @@
         <mockrunner-jms.version>1.1.2</mockrunner-jms.version>
         <sshd.version>1.6.0</sshd.version>
         <eddsa.version>0.2.0</eddsa.version>
-        <activemq.version>5.15.11</activemq.version>
+        <activemq.version>5.16.0</activemq.version>
         <rabbitmq-mock.version>1.0.14</rabbitmq-mock.version>
         <wire-mock.version>2.26.3</wire-mock.version>
         <pitest.version>1.4.9</pitest.version>
@@ -572,7 +572,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>jaxb2-maven-plugin</artifactId>
-                    <version>2.3.1</version>
+                    <version>2.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -620,7 +620,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.0.2</version>
+                    <version>3.2.0</version>
                     <configuration>
                         <archive>
                             <manifest>
